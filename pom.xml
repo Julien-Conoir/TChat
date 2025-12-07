@@ -21,6 +21,7 @@
         <module>auth</module>
         <module>channel</module>
         <module>message</module>
+        <module>gateway</module>
     </modules>
 
     <properties>
