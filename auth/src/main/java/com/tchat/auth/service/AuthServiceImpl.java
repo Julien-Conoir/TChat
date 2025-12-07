@@ -19,6 +19,7 @@ public class AuthServiceImpl implements AuthService{
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final KafkaTopicService kafkaTopicService;
 
     @Override
     public AuthResponseDTO register(AuthRequestDTO request) {
@@ -32,6 +33,8 @@ public class AuthServiceImpl implements AuthService{
         UserEntity user = new UserEntity(request.getNickname(), hashedPassword);
 
         userRepository.save(user);
+
+        kafkaTopicService.createTopicForUser(request.getNickname());
 
         return userMapper.toAuthResponse(user);
     }
