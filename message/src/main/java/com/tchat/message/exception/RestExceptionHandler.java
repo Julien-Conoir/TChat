@@ -1,7 +1,5 @@
 package com.tchat.message.exception;
 
-import com.tchat.channel.exception.ChannelException;
-import com.tchat.channel.exception.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,8 +8,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class RestExceptionHandler {
 
-    @ExceptionHandler(ChannelException.class)
-    public ResponseEntity<ErrorResponse> handleAuthException(ChannelException ex) {
+    @ExceptionHandler(MessageException.class)
+    public ResponseEntity<ErrorResponse> handleAuthException(MessageException ex) {
 
         ErrorResponse error = new ErrorResponse(ex.getStatus().value(), ex.getMessage());
         return new ResponseEntity<>(error, ex.getStatus());
