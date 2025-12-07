@@ -1,0 +1,16 @@
+spring:
+    application:
+        name: channel
+    data:
+        mongodb:
+        host: localhost
+        port: 27017
+        database: tchat-channel
+        auto-index-creation: true
+
+server:
+    port: 8082
+
+logging:
+    level:
+        com.tchat.auth: DEBUG
