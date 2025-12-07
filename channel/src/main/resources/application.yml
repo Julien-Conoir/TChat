@@ -13,4 +13,4 @@ server:
 
 logging:
     level:
-        com.tchat.auth: DEBUG
+        com.tchat.channel: DEBUG
