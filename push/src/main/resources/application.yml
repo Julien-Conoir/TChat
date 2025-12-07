@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: push
+
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: push-service-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+      auto-offset-reset: earliest
+
+auth:
+  service:
+    url: http://localhost:8081
+
+server:
+  port: 8084
+
+tcp:
+  port: 9999
+
+logging:
+  level:
+    com.tchat.push: DEBUG
