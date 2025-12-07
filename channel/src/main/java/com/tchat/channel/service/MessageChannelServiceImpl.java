@@ -16,6 +16,7 @@ public class MessageChannelServiceImpl implements MessageChannelService {
 
     private final MessageChannelRepository messageChannelRepository;
     private final MessageChannelMapper messageChannelMapper;
+    private final KafkaProducerService kafkaProducerService;
 
     @Override
     public List<MessageChannelResponseDTO> getAllMessagesFromAChannel(String channelName, String userNickname) {
@@ -27,7 +28,11 @@ public class MessageChannelServiceImpl implements MessageChannelService {
 
     @Override
     public void sendMessageToAChannel(MessageChannelRequestDTO messageChannelRequestDTO, String userNickname) {
-        //TODO implement kafak producer to send message to channel topic
+        kafkaProducerService.sendGroupMessage(
+                userNickname,
+                messageChannelRequestDTO.getChannelName(),
+                messageChannelRequestDTO.getContent()
+        );
 
         MessageChannelEntity messageChannelEntity = new MessageChannelEntity(
                 messageChannelRequestDTO.getChannelName(),
