@@ -16,13 +16,14 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.PreDestroy;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DynamicKafkaConsumerService {
 
     private final ConcurrentKafkaListenerContainerFactory<String, KafkaMessageDTO> kafkaListenerContainerFactory;
     private final ClientManager clientManager;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     private final ConcurrentHashMap<String, ConcurrentMessageListenerContainer<String, KafkaMessageDTO>> containers = new ConcurrentHashMap<>();
 
@@ -66,6 +67,7 @@ public class DynamicKafkaConsumerService {
             String jsonMessage = objectMapper.writeValueAsString(message);
             clientManager.sendMessageToClient(nickname, jsonMessage);
         } catch (JsonProcessingException e) {
+            log.error("Erreur de sérialisation JSON pour le message destiné à {}", nickname, e);
         }
     }
 
