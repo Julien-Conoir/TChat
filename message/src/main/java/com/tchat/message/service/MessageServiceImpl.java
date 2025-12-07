@@ -16,6 +16,7 @@ public class MessageServiceImpl implements  MessageService {
 
     private final MessageRepository messageRepository;
     private final MessageMapper messageMapper;
+    private final KafkaProducerService kafkaProducerService;
 
     @Override
     public List<MessageResponseDTO> getAllMessages(String userNickname) {
@@ -27,7 +28,11 @@ public class MessageServiceImpl implements  MessageService {
 
     @Override
     public void sendMessage(MessageRequestDTO messageRequestDTO, String userNickname) {
-        //TODO implement kafak producer to send private message to user topic
+        kafkaProducerService.sendPrivateMessage(
+                userNickname,
+                messageRequestDTO.getReceiverNickname(),
+                messageRequestDTO.getContent()
+        );
 
         MessageEntity messageEntity = new MessageEntity(
                 userNickname,
