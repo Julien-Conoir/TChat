@@ -41,6 +41,8 @@ public class KafkaConsumerConfig {
         configProps.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
         configProps.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
         configProps.put(JsonDeserializer.VALUE_DEFAULT_TYPE, KafkaMessageDTO.class.getName());
+        configProps.put(JsonDeserializer.TYPE_MAPPINGS, "com.tchat.message.dto.KafkaMessageDTO:com.alom.push.dto.KafkaMessageDTO");
+        configProps.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
         configProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         return new DefaultKafkaConsumerFactory<>(configProps);
     }
