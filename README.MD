@@ -28,55 +28,7 @@ TChat est une application de messagerie en temps réel construite avec une archi
 
 TChat utilise une **architecture microservices** avec les composants suivants :
 
-```
-                                    ┌─────────────────┐
-                                    │   Client TCP    │
-                                    │   (Port 9999)   │
-                                    └────────┬────────┘
-                                             │
-┌─────────────────┐                          │
-│     Client      │                          │
-│  (HTTP/REST)    │                          │
-└────────┬────────┘                          │
-         │                                   │
-         ▼                                   ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    🌐 GATEWAY (Port 8080)                    │
-│              Spring Cloud Gateway + Security                 │
-│         Route & Authentification des requêtes               │
-└─────────────────────────────────────────────────────────────┘
-         │                    │                    │
-         ▼                    ▼                    ▼
-┌─────────────┐      ┌─────────────┐      ┌─────────────┐      ┌─────────────┐
-│  🔐 AUTH    │      │ 📨 MESSAGE  │      │ 📢 CHANNEL  │      │  📤 PUSH    │
-│ (Port 8081) │      │ (Port 8083) │      │ (Port 8082) │      │ (Port 8084) │
-│             │      │             │      │             │      │             │
-│ - Register  │      │ - Messages  │      │ - Channels  │      │ - TCP Push  │
-│ - Login     │      │   privés    │      │ - Membres   │      │ - Kafka     │
-│ - Token     │      │ - Messages  │      │ - Messages  │      │   Consumer  │
-│   Verify    │      │   groupe    │      │   groupe    │      │             │
-└──────┬──────┘      └──────┬──────┘      └──────┬──────┘      └──────┬──────┘
-       │                    │                    │                    │
-       ▼                    ▼                    ▼                    │
-┌─────────────┐      ┌─────────────┐      ┌─────────────┐            │
-│  MongoDB    │      │  MongoDB    │      │  MongoDB    │            │
-│   Auth      │      │  Message    │      │  Channel    │            │
-│ (Port 27017)│      │ (Port 27018)│      │ (Port 27019)│            │
-└─────────────┘      └─────────────┘      └─────────────┘            │
-                            │                    │                    │
-                            ▼                    ▼                    ▼
-                     ┌─────────────────────────────────────────────────┐
-                     │            🔄 KAFKA (Port 9092)                 │
-                     │         Message Broker / Event Bus              │
-                     │    Topics par utilisateur pour les messages     │
-                     └─────────────────────────────────────────────────┘
-```
-
-### 🔄 Flux de messages
-
-1. **Messages privés** : `Client → Gateway → Message Service → Kafka → Push Service → Client TCP`
-2. **Messages de groupe** : `Client → Gateway → Channel Service → Kafka → Push Service → Clients TCP`
-3. **Authentification** : `Client → Gateway → Auth Service → Token JWT`
+![Schema Architecture](./schéma_architecture_CONOIR_PAWLOWSKI_LIETARD.png)
 
 ---
 
@@ -109,12 +61,11 @@ docker-compose --version
 
 ## 🚀 Démarrage rapide
 
-### Option 1 : Lancement avec Docker (Recommandé pour les dépendances)
+### Etape 1 : Lancement des instances BDD et Kafka avec Docker
 
 ```bash
-# 1. Cloner le repository
-git clone https://github.com/votre-username/tchat.git
-cd tchat
+# 1. Se positionner à la racine du projet
+cd path/tchat
 
 # 2. Démarrer les services d'infrastructure (MongoDB + Kafka)
 docker-compose up -d
@@ -123,7 +74,7 @@ docker-compose up -d
 docker-compose ps
 ```
 
-### Option 2 : Lancement des microservices
+### Etape 2 : Lancement des microservices
 
 #### Avec Maven Wrapper (Windows)
 
@@ -171,20 +122,6 @@ cd gateway
 ./mvnw spring-boot:run -pl gateway
 ```
 
-### Vérification du démarrage
-
-Une fois tous les services lancés, vérifiez leur état :
-
-| Service | URL | Health Check |
-|---------|-----|--------------|
-| Gateway | http://localhost:8080 | ✅ |
-| Auth | http://localhost:8081 | ✅ |
-| Channel | http://localhost:8082 | ✅ |
-| Message | http://localhost:8083 | ✅ |
-| Push | http://localhost:8084 | ✅ |
-
----
-
 ## 📦 Modules
 
 ### 🌐 Gateway (Port 8080)
@@ -218,11 +155,11 @@ Gestion des canaux de discussion de groupe.
 |----------|---------|-------------|------|
 | `/channels` | POST | Créer un channel | ✅ |
 | `/channels` | GET | Lister les channels | ✅ |
-| `/channels/{id}` | GET | Détails d'un channel | ✅ |
-| `/channels/{id}/subscribe` | POST | Rejoindre un channel | ✅ |
-| `/channels/{id}/unsubscribe` | POST | Quitter un channel | ✅ |
-| `/channels/{id}/messages` | POST | Envoyer un message dans le channel | ✅ |
-| `/channels/{id}/messages` | GET | Récupérer les messages du channel | ✅ |
+| `/channels/{channelName}` | DELETE | Supprimer un channel | ✅ |
+| `/channels/{channelName}/subscribe` | POST | Rejoindre un channel | ✅ |
+| `/channels/{channelName}/unsubscribe` | POST | Quitter un channel | ✅ |
+| `/channels/{channelName}/messages` | POST | Envoyer un message dans le channel | ✅ |
+| `/channels/{channelName}/messages` | GET | Récupérer les messages du channel | ✅ |
 
 ### 📤 Push (Port 8084 + TCP 9999)
 Service de notification en temps réel.
@@ -242,8 +179,8 @@ Service de notification en temps réel.
 curl -X POST http://localhost:8080/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "nickname": "john_doe",
-    "password": "SecureP@ss123"
+    "nickname": "alice",
+    "password": "password"
   }'
 ```
 
@@ -252,14 +189,21 @@ curl -X POST http://localhost:8080/auth/register \
 curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "nickname": "john_doe",
-    "password": "SecureP@ss123"
+    "nickname": "alice",
+    "password": "password"
   }'
 ```
 
-**Réponse :**
+#### Validation token
+```bash
+curl -X POST http://localhost:8080/auth/token \
+  -H "Authorization: <TOKEN>"
+```
+
+**Réponse connexion et validation token :**
 ```json
 {
+  "nickname": "alice",
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
@@ -277,6 +221,12 @@ curl -X POST http://localhost:8080/messages \
   }'
 ```
 
+#### Récupérer tous ses messages privés
+```bash
+curl -X GET http://localhost:8080/messages \
+  -H "Authorization: <TOKEN>"
+```
+
 ### Channels
 
 #### Créer un channel
@@ -285,14 +235,25 @@ curl -X POST http://localhost:8080/channels \
   -H "Content-Type: application/json" \
   -H "Authorization: <TOKEN>" \
   -d '{
-    "name": "general",
-    "description": "Channel général de discussion"
+    "channelName": "general"
   }'
+```
+
+#### Supprimer un channel
+```bash
+curl -X DELETE http://localhost:8080/channels/{channelName} \
+  -H "Authorization: <TOKEN>"
 ```
 
 #### Rejoindre un channel
 ```bash
-curl -X POST http://localhost:8080/channels/{channelId}/subscribe \
+curl -X POST http://localhost:8080/channels/{channelName}/subscribe \
+  -H "Authorization: <TOKEN>"
+```
+
+#### Quitter un channel
+```bash
+curl -X POST http://localhost:8080/channels/{channelName}/unsubscribe \
   -H "Authorization: <TOKEN>"
 ```
 
@@ -394,6 +355,7 @@ TChat/
 ├── 📁 push/                    # Service de push
 │   ├── src/main/java/
 │   │   └── com/alom/push/
+|   |       ├── client/         # Appel service Client
 │   │       ├── config/         # Configuration Kafka
 │   │       ├── dto/            # DTOs
 │   │       ├── kafka/          # Consumers Kafka
