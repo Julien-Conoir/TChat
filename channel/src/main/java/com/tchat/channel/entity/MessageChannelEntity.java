@@ -15,13 +15,11 @@ public class MessageChannelEntity {
 
     private String channelName;
     private String senderNickname;
-    private String receiverNickname;
     private String content;
 
-    public MessageChannelEntity(String channelName, String senderNickname, String receiverNickname, String content) {
+    public MessageChannelEntity(String channelName, String senderNickname, String content) {
         this.channelName = channelName;
         this.senderNickname = senderNickname;
-        this.receiverNickname = receiverNickname;
         this.content = content;
     }
 }

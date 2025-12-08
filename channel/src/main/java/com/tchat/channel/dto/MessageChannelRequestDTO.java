@@ -13,10 +13,6 @@ public class MessageChannelRequestDTO {
     @NotBlank(message = "Channel name is required")
     private String channelName;
 
-    @Schema(description = "Receiver nickname", example = "bob")
-    @NotBlank(message = "Receiver nickname is required")
-    private String receiverNickname;
-
     @Schema(description = "Message content", example = "Hello, everyone!")
     @NotBlank(message = "Message content is required")
     private String content;

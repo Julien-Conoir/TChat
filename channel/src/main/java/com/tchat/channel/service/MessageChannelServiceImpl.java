@@ -37,7 +37,6 @@ public class MessageChannelServiceImpl implements MessageChannelService {
         MessageChannelEntity messageChannelEntity = new MessageChannelEntity(
                 messageChannelRequestDTO.getChannelName(),
                 userNickname,
-                messageChannelRequestDTO.getReceiverNickname(),
                 messageChannelRequestDTO.getContent()
         );
 
