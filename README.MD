@@ -122,6 +122,17 @@ cd gateway
 ./mvnw spring-boot:run -pl gateway
 ```
 
+### Etape 3 : Connexion au serveur TCP
+
+Le service Push écoute sur le port TCP `9999` pour les connexions clients.
+
+```bash
+# Exemple de connexion avec telnet
+telnet localhost 9999
+```
+
+Il vous sera demandé de fournir un token d'authentification après la connexion.
+
 ## 📦 Modules
 
 ### 🌐 Gateway (Port 8080)
@@ -151,15 +162,15 @@ Gestion des messages privés entre utilisateurs.
 ### 📢 Channel (Port 8082)
 Gestion des canaux de discussion de groupe.
 
-| Endpoint | Méthode | Description | Auth |
-|----------|---------|-------------|------|
-| `/channels` | POST | Créer un channel | ✅ |
-| `/channels` | GET | Lister les channels | ✅ |
-| `/channels/{channelName}` | DELETE | Supprimer un channel | ✅ |
-| `/channels/{channelName}/subscribe` | POST | Rejoindre un channel | ✅ |
+| Endpoint                              | Méthode | Description | Auth |
+|---------------------------------------|---------|-------------|------|
+| `/channels`                           | POST | Créer un channel | ✅ |
+| `/channels`                           | GET | Lister les channels | ✅ |
+| `/channels/{channelName}`             | DELETE | Supprimer un channel | ✅ |
+| `/channels/{channelName}/subscribe`   | POST | Rejoindre un channel | ✅ |
 | `/channels/{channelName}/unsubscribe` | POST | Quitter un channel | ✅ |
-| `/channels/{channelName}/messages` | POST | Envoyer un message dans le channel | ✅ |
-| `/channels/{channelName}/messages` | GET | Récupérer les messages du channel | ✅ |
+| `/channels/messages`                  | POST | Envoyer un message dans le channel | ✅ |
+| `/channels/messages/{channelName}`    | GET | Récupérer les messages du channel | ✅ |
 
 ### 📤 Push (Port 8084 + TCP 9999)
 Service de notification en temps réel.
@@ -254,6 +265,23 @@ curl -X POST http://localhost:8080/channels/{channelName}/subscribe \
 #### Quitter un channel
 ```bash
 curl -X POST http://localhost:8080/channels/{channelName}/unsubscribe \
+  -H "Authorization: <TOKEN>"
+```
+
+#### Envoyer un message dans un channel
+```bash
+curl -X POST http://localhost:8080/channels/messages \
+  -H "Content-Type: application/json" \
+  -H "Authorization: <TOKEN>" \
+  -d '{
+    "channelName": "general",
+    "content": "Bonjour à tous !"
+  }'
+```
+
+#### Récupérer les messages d'un channel
+```bash
+curl -X GET http://localhost:8080/channels/messages/{channelName} \
   -H "Authorization: <TOKEN>"
 ```
 
